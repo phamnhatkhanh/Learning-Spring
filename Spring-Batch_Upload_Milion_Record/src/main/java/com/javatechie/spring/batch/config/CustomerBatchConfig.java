@@ -5,6 +5,7 @@ import com.javatechie.spring.batch.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -14,6 +15,7 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -23,10 +25,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @AllArgsConstructor
-public class SpringBatchConfig {
+@EnableBatchProcessing
+public class CustomerBatchConfig {
 
 
     private CustomerRepository customerRepository;
+//    @Autowired
+//    private Step step;
 
 
     @Bean
@@ -57,8 +62,8 @@ public class SpringBatchConfig {
     }
 
     @Bean
-    public CustomerProcessor processor() {
-        return new CustomerProcessor();
+    public CustomerItemProcessor processor() {
+        return new CustomerItemProcessor();
     }
 
     @Bean
@@ -69,7 +74,7 @@ public class SpringBatchConfig {
         return writer;
     }
 
-    @Bean
+    @Bean("stepImportCustomer")
     public Step step1(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("csv-step",jobRepository).
                 <Customer, Customer>chunk(100,transactionManager)
@@ -80,9 +85,9 @@ public class SpringBatchConfig {
                 .build();
     }
 
-    @Bean
+    @Bean("importCustomerJob")
     public Job runJob(JobRepository jobRepository,PlatformTransactionManager transactionManager) {
-        return new JobBuilder("importCustomers",jobRepository)
+        return new JobBuilder("importCustomerJob",jobRepository)
                 .flow(step1(jobRepository,transactionManager)).end().build();
     }
 

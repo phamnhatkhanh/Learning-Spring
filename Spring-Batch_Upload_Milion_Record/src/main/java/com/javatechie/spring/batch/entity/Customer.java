@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "CUSTOMERS_INFO")
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Customer {
